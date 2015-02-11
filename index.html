@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<!--[if IE 9]><html class="lt-ie10" lang="en" > <![endif]-->
+<html class="no-js" lang="en" >
+  <head>
+	  <meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Google Map Demo</title>
+    
+		<link rel="stylesheet" href="css/normalize.css">
+		<link rel="stylesheet" href="css/foundation.min.css">
+		
+		<style type="text/css">
+      #map-canvas { height: 500px; width: 100%; margin-bottom: 30px; padding: 0;}
+			#pac-input { 
+				z-index: 0; position: relative; left: 0px; top: 0px;
+				background-color: #fff; padding: 0 11px 0 13px; width: 400px; font-family: Roboto; font-size: 15px; font-weight: 300; text-overflow: ellipsis;
+			}
+			#pac-input:focus {border-color: #4d90fe; margin-left: -1px; padding-left: 14px;  /* Regular padding-left + 1. */ width: 401px;}
+    </style>
+		
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=places"></script>
+    <script type="text/javascript">
+      function initialize() {
+				var markers = [];
+				var MY_MAPTYPE_ID = 'custom_style';
+				var melbourne = new google.maps.LatLng(-37.81, 144.96);
+				
+				var featureOpts = [
+					{
+						"featureType": "poi.business",
+						"elementType": "labels.icon",
+						"stylers": [
+							{ "visibility": "off" }
+						]
+					},{
+						"featureType": "transit.station.rail",
+						"elementType": "labels.text.fill",
+						"stylers": [
+							{ "color": "#b7343b" }
+						]
+					},{
+						"featureType": "transit.station.rail",
+						"elementType": "labels.icon",
+						"stylers": [
+							{ "hue": "#b6343b" },
+							{ "gamma": 0.45 }
+						]
+					}
+				];
+
+        var mapOptions = {
+					disableDefaultUI: true,
+          center: melbourne,
+          zoom: 12,
+					mapTypeControlOptions: {
+						mapTypeIds: [google.maps.MapTypeId.ROADMAP, MY_MAPTYPE_ID]
+					},
+					mapTypeId: MY_MAPTYPE_ID
+        };
+				
+        var map = new google.maps.Map(document.getElementById('map-canvas'),
+            mapOptions);
+						
+				var styledMapOptions = {
+					name: 'Custom Style'
+				};
+				
+				var customMapType = new google.maps.StyledMapType(featureOpts, styledMapOptions);
+
+				map.mapTypes.set(MY_MAPTYPE_ID, customMapType);
+				
+				// Create the search box and link it to the UI element.
+				var input = /** @type {HTMLInputElement} */ (document.getElementById('pac-input'));
+				map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+				
+				var searchBox = new google.maps.places.SearchBox((input)); /** @type {HTMLInputElement} */
+				
+				// [START region_getplaces]
+				// Listen for the event fired when the user selects an item from the
+				// pick list. Retrieve the matching places for that item.
+				google.maps.event.addListener(searchBox, 'places_changed', function() {
+					var places = searchBox.getPlaces();
+
+					if (places.length == 0) {
+						return;
+					}
+					
+					for (var i = 0, marker; marker = markers[i]; i++) {
+						marker.setMap(null);
+					}
+
+					// For each place, get the icon, place name, and location.
+					markers = [];
+					var bounds = new google.maps.LatLngBounds();
+					for (var i = 0, place; place = places[i]; i++) {
+						var image = 'img/house.png';
+						/*var image = {
+							url: place.icon,
+							size: new google.maps.Size(71, 71),
+							origin: new google.maps.Point(0, 0),
+							anchor: new google.maps.Point(17, 34),
+							scaledSize: new google.maps.Size(25, 25)
+						};*/
+
+						// Create a marker for each place.
+						var marker = new google.maps.Marker({
+							map: map,
+							icon: image,
+							title: place.name,
+								position: place.geometry.location
+						});
+
+						markers.push(marker);
+
+						bounds.extend(place.geometry.location);
+					}
+
+					map.fitBounds(bounds);
+					map.setZoom(18);
+				});
+				// [END region_getplaces]
+				
+				// Bias the SearchBox results towards places that are within the bounds of the
+				// current map's viewport.
+				google.maps.event.addListener(map, 'bounds_changed', function() {
+					var bounds = map.getBounds();
+					searchBox.setBounds(bounds);
+				});
+      }
+			
+      google.maps.event.addDomListener(window, 'load', initialize);
+    </script>
+  </head>
+  <body>
+		<div class="row">
+			<div class="large-12 columns intro-text">
+				<h1>Google Map Demo</h1>
+			</div>
+		</div>
+		<div class="row">
+			<div class="large-4 small-6 columns"><input id="pac-input" class="controls" type="text" placeholder="Search Box"></div>
+			<div class="large-4 small-6 columns" id="map-canvas"></div>
+			<div class="large-4 small-6 columns"></div>
+		</div>
+		<div class="row">
+			<div class="large-12 columns">
+				<div class="panel">
+					<h4>Read Me:</h4>
+					<div class="row">
+						<div class="large-12 columns">
+							<p>This is a custom styled Google Map built with:</p>
+							<ul>
+								<li>Disabled default UI</li>
+								<li>Custom marker</li>
+								<li>Places search box</li>
+								<li><a href="http://foundation.zurb.com/index.html">Foundation 5</a> front-end framework</li>
+							</ul>
+							<p>It was made to speed up my map-making process at Linkubi, with reference from the Google Maps JS API v3 docs <a href="https://developers.google.com/maps/documentation/javascript/examples/">here</a>.</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<footer class="row">
+			<hr/>
+			<div class="row">
+				<div class="large-6 columns">
+						<p>Make by <a href="http://jhkueh.github.io/">JHKueh</a></p>
+				</div>
+			</div>
+		</footer>
+  </body>
+</html>
