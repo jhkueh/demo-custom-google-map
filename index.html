@@ -93,7 +93,13 @@
 					markers = [];
 					var bounds = new google.maps.LatLngBounds();
 					for (var i = 0, place; place = places[i]; i++) {
-						var image = 'img/house.png';
+						var image = {
+							url: 'img/house.png',
+							size: new google.maps.Size(50, 50),
+							origin: new google.maps.Point(0, 0),
+							anchor: new google.maps.Point(25, 35)
+						};
+						
 						/*var image = {
 							url: place.icon,
 							size: new google.maps.Size(71, 71),
@@ -107,7 +113,7 @@
 							map: map,
 							icon: image,
 							title: place.name,
-								position: place.geometry.location
+							position: place.geometry.location
 						});
 
 						markers.push(marker);
@@ -151,7 +157,7 @@
 							<p>This is a custom styled Google Map built with:</p>
 							<ul>
 								<li>Disabled default UI</li>
-								<li>Custom marker</li>
+								<li>Custom complex marker</li>
 								<li>Places search box</li>
 								<li><a href="http://foundation.zurb.com/index.html">Foundation 5</a> front-end framework</li>
 							</ul>

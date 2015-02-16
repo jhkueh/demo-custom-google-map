@@ -3,7 +3,7 @@
 This is a custom styled Google Map built with:
 
 + Disabled default UI
-+ Custom marker
++ Custom complex marker
 + Places search box
 + [Foundation 5](http://foundation.zurb.com/index.html) front-end framework
 
