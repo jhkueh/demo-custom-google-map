@@ -16,58 +16,111 @@
 				background-color: #fff; padding: 0 11px 0 13px; width: 400px; font-family: Roboto; font-size: 15px; font-weight: 300; text-overflow: ellipsis;
 			}
 			#pac-input:focus {border-color: #4d90fe; margin-left: -1px; padding-left: 14px;  /* Regular padding-left + 1. */ width: 401px;}
-    </style>
+		</style>
 		
     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=places"></script>
     <script type="text/javascript">
+			var melbourne = new google.maps.LatLng(-37.81, 144.96);
+			
+			var MY_MAPTYPE_ID  = 'custom_style';
+			var MY_MAPTYPE_ID2 = 'custom_style2';
+			var styledMapOptions2 = {
+					name: 'Custom Style2'
+				};
+			var featureOpts = [
+				{
+					"featureType": "poi.business",
+					"elementType": "labels.icon",
+					"stylers": [
+						{ "visibility": "off" }
+					]
+				},{
+					"featureType": "transit.station.rail",
+					"elementType": "labels.text.fill",
+					"stylers": [
+						{ "color": "#b7343b" }
+					]
+				},{
+					"featureType": "transit.station.rail",
+					"elementType": "labels.icon",
+					"stylers": [
+						{ "hue": "#b6343b" },
+						{ "gamma": 0.45 }
+					]
+				}
+			];
+			var featureOpts2 = [
+			  {
+					"elementType": "labels.text",
+					"stylers": [
+						{ "visibility": "off" }
+					]
+				},{
+					"elementType": "labels.icon",
+					"stylers": [
+						{ "visibility": "off" }
+					]
+				}
+			];
+
+			function ToggleLabelControl(controlDiv, map) {
+
+				// Set CSS for the control border
+				var controlUI = document.createElement('div');
+				controlUI.style.backgroundColor = '#fff';
+				controlUI.style.border = '1px solid #DADADA';
+				controlUI.style.borderRadius = '3px';
+				controlUI.style.boxShadow = '0 2px 6px rgba(0,0,0,.3)';
+				controlUI.style.cursor = 'pointer';
+				controlUI.style.marginBottom = '22px';
+				controlUI.style.textAlign = 'center';
+				controlUI.title = 'Click to recenter the map';
+				controlDiv.appendChild(controlUI);
+				
+				// Set CSS for the control interior
+				var controlText = document.createElement('div');
+				controlText.style.color = 'rgb(25,25,25)';
+				controlText.style.fontFamily = 'Roboto,Arial,sans-serif';
+				controlText.style.fontSize = '16px';
+				controlText.style.lineHeight = '30px';
+				controlText.style.paddingLeft = '5px';
+				controlText.style.paddingRight = '5px';
+				controlText.innerHTML = 'Toggle Labels';
+				controlUI.appendChild(controlText);
+
+				// Setup the click event listeners:
+				google.maps.event.addDomListener(controlUI, 'click', function() {
+					if (map.getMapTypeId() == 'custom_style') {
+						map.setMapTypeId(MY_MAPTYPE_ID2);
+					} else {
+						map.setMapTypeId(MY_MAPTYPE_ID);
+					}
+				});
+			}
+			
       function initialize() {
 				var markers = [];
-				var MY_MAPTYPE_ID = 'custom_style';
-				var melbourne = new google.maps.LatLng(-37.81, 144.96);
-				
-				var featureOpts = [
-					{
-						"featureType": "poi.business",
-						"elementType": "labels.icon",
-						"stylers": [
-							{ "visibility": "off" }
-						]
-					},{
-						"featureType": "transit.station.rail",
-						"elementType": "labels.text.fill",
-						"stylers": [
-							{ "color": "#b7343b" }
-						]
-					},{
-						"featureType": "transit.station.rail",
-						"elementType": "labels.icon",
-						"stylers": [
-							{ "hue": "#b6343b" },
-							{ "gamma": 0.45 }
-						]
-					}
-				];
-
-        var mapOptions = {
+				var mapOptions = {
 					disableDefaultUI: true,
-          center: melbourne,
-          zoom: 12,
+					center: melbourne,
+					zoom: 12,
 					mapTypeControlOptions: {
-						mapTypeIds: [google.maps.MapTypeId.ROADMAP, MY_MAPTYPE_ID]
+						mapTypeIds: [google.maps.MapTypeId.ROADMAP, MY_MAPTYPE_ID, MY_MAPTYPE_ID2]
 					},
 					mapTypeId: MY_MAPTYPE_ID
-        };
+				};
 				
-        var map = new google.maps.Map(document.getElementById('map-canvas'),
-            mapOptions);
-						
+				var map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
 				var styledMapOptions = {
 					name: 'Custom Style'
 				};
 				
 				var customMapType = new google.maps.StyledMapType(featureOpts, styledMapOptions);
-
 				map.mapTypes.set(MY_MAPTYPE_ID, customMapType);
+				map.setMapTypeId(MY_MAPTYPE_ID);
+				
+				var customMapType2 = new google.maps.StyledMapType(featureOpts2, styledMapOptions2);
+				map.mapTypes.set(MY_MAPTYPE_ID2, customMapType2);
 				
 				// Create the search box and link it to the UI element.
 				var input = /** @type {HTMLInputElement} */ (document.getElementById('pac-input'));
@@ -132,6 +185,15 @@
 					var bounds = map.getBounds();
 					searchBox.setBounds(bounds);
 				});
+				
+				// Create the DIV to hold the control and
+				// call the CenterControl() constructor passing
+				// in this DIV.
+				var centerControlDiv = document.createElement('div');
+				var centerControl = new ToggleLabelControl(centerControlDiv, map);
+
+				centerControlDiv.index = 1;
+				map.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(centerControlDiv);
       }
 			
       google.maps.event.addDomListener(window, 'load', initialize);
@@ -159,6 +221,7 @@
 								<li>Disabled default UI</li>
 								<li>Custom complex marker</li>
 								<li>Places search box</li>
+								<li>Custom control (Toggle Labels' Visibility)</li>
 								<li><a href="http://foundation.zurb.com/index.html">Foundation 5</a> front-end framework</li>
 							</ul>
 							<p>It was made to speed up my map-making process at Linkubi, with reference from the Google Maps JS API v3 docs <a href="https://developers.google.com/maps/documentation/javascript/examples/">here</a>.</p>
