@@ -1,6 +1,6 @@
 # Custom Styled Google Map
 
-This is a custom styled Google Map built with:
+This is a custom styled Google Map ([web demo](http://jhkueh.github.io/demo-custom-google-map/)) built with:
 
 + Disabled default UI
 + Custom complex marker
