@@ -10,6 +10,17 @@
 		<link rel="stylesheet" href="css/foundation.min.css">
 		
 		<style type="text/css">
+			.clearInput {
+				font-size: 36px;
+				color: #bbb;
+				cursor: pointer;
+				top: -7px;
+				right: -50px;
+				position: absolute;
+				-webkit-transform: rotate(45deg);
+				transform: rotate(45deg);
+				z-index: 10;
+			}
 			#map-canvas { height: 500px; width: 100%; margin-bottom: 30px; padding: 0;}
 			#pac-input { 
 				z-index: 0; position: relative; left: 0px; top: 0px;
@@ -20,6 +31,11 @@
 		
 		<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=places"></script>
 		<script type="text/javascript">
+		
+			function clearInput() {
+				document.getElementById("pac-input").value = "";
+			}
+
 			var melbourne = new google.maps.LatLng(-37.81, 144.96);
 			
 			var MY_MAPTYPE_ID  = 'custom_style';
@@ -206,7 +222,10 @@
 			</div>
 		</div>
 		<div class="row">
-			<div class="large-4 small-6 columns"><input id="pac-input" class="controls" type="text" placeholder="Search Box"></div>
+			<div class="large-4 small-6 columns">
+			  <input id="pac-input" class="controls" type="text" placeholder="Search Box">
+				<span class="clearInput" onclick="clearInput()">+</span>
+			</div>
 			<div class="large-4 small-6 columns" id="map-canvas"></div>
 			<div class="large-4 small-6 columns"></div>
 		</div>
