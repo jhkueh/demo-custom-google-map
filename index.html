@@ -10,6 +10,9 @@
 		<link rel="stylesheet" href="css/foundation.min.css">
 		
 		<style type="text/css">
+			:focus {
+				outline: none;
+			}
 			.clearInput {
 				font-size: 36px;
 				color: #bbb;
@@ -21,6 +24,37 @@
 				transform: rotate(45deg);
 				z-index: 10;
 			}
+			#floating-panel {
+				margin-bottom: 22px;
+				
+				text-align: center;
+				height: 30px;
+			}
+			#floating-panel label {
+				margin: 0 1rem;
+				box-shadow: rgba(0, 0, 0, 0.3) 0px 2px 6px;
+				background-color: #fff;
+				border-radius: 3px;
+				color: #191919;
+				display: inline-block;
+				font-family: 'Roboto','sans-serif';
+				font-size: 16px;
+				line-height: 30px;
+				padding-left: 5px;
+				padding-right: 5px;
+				user-select: none;
+			}
+			#floating-panel input[type=checkbox] {
+				display: none;
+			}
+			#floating-panel input[type=checkbox]:checked + label {
+				background-color: #ccc;
+				box-shadow: inset rgba(0,0,0,0.3) 0px 0px 3px;
+				color: #777;
+				top: 3px;
+				position: relative;
+			}
+
 			#map-canvas { height: 500px; width: 100%; margin-bottom: 30px; padding: 0;}
 			#pac-input { 
 				z-index: 0; position: relative; left: 0px; top: 0px;
@@ -28,110 +62,19 @@
 			}
 			#pac-input:focus {border-color: #4d90fe; margin-left: -1px; padding-left: 14px;  /* Regular padding-left + 1. */ width: 401px;}
 		</style>
-		
-		<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=places"></script>
+
 		<script type="text/javascript">
-			var melbourne = new google.maps.LatLng(-37.81, 144.96);
-			
-			var MY_MAPTYPE_ID  = 'custom_style';
-			var MY_MAPTYPE_ID2 = 'custom_style2';
-			var styledMapOptions2 = {
-					name: 'Custom Style2'
-				};
-			var featureOpts = [
-				{
-					"featureType": "poi.business",
-					"elementType": "labels.icon",
-					"stylers": [
-						{ "visibility": "off" }
-					]
-				},{
-					"featureType": "transit.station.rail",
-					"elementType": "labels.text.fill",
-					"stylers": [
-						{ "color": "#b7343b" }
-					]
-				},{
-					"featureType": "transit.station.rail",
-					"elementType": "labels.icon",
-					"stylers": [
-						{ "hue": "#b6343b" },
-						{ "gamma": 0.45 }
-					]
-				}
-			];
-			var featureOpts2 = [
-			  {
-					"elementType": "labels.text",
-					"stylers": [
-						{ "visibility": "off" }
-					]
-				},{
-					"elementType": "labels.icon",
-					"stylers": [
-						{ "visibility": "off" }
-					]
-				}
-			];
-
-			function ToggleLabelControl(controlDiv, map) {
-
-				// Set CSS for the control border
-				var controlUI = document.createElement('div');
-				controlUI.style.backgroundColor = '#fff';
-				controlUI.style.border = '1px solid #DADADA';
-				controlUI.style.borderRadius = '3px';
-				controlUI.style.boxShadow = '0 2px 6px rgba(0,0,0,.3)';
-				controlUI.style.cursor = 'pointer';
-				controlUI.style.marginBottom = '22px';
-				controlUI.style.textAlign = 'center';
-				controlUI.title = 'Click to show/hide the labels';
-				controlDiv.appendChild(controlUI);
-				
-				// Set CSS for the control interior
-				var controlText = document.createElement('div');
-				controlText.style.color = 'rgb(25,25,25)';
-				controlText.style.fontFamily = 'Roboto,Arial,sans-serif';
-				controlText.style.fontSize = '16px';
-				controlText.style.lineHeight = '30px';
-				controlText.style.paddingLeft = '5px';
-				controlText.style.paddingRight = '5px';
-				controlText.innerHTML = 'Toggle Labels';
-				controlUI.appendChild(controlText);
-
-				// Setup the click event listeners:
-				google.maps.event.addDomListener(controlUI, 'click', function() {
-					if (map.getMapTypeId() == 'custom_style') {
-						map.setMapTypeId(MY_MAPTYPE_ID2);
-					} else {
-						map.setMapTypeId(MY_MAPTYPE_ID);
-					}
-				});
-			}
-			
-			function initialize() {
+			function initMap() {
 				var markers = [];
 				var mapOptions = {
 					disableDefaultUI: true,
-					center: melbourne,
+					center: { lat: -37.81, lng: 144.96 },
 					zoom: 12,
-					mapTypeControlOptions: {
-						mapTypeIds: [google.maps.MapTypeId.ROADMAP, MY_MAPTYPE_ID, MY_MAPTYPE_ID2]
-					},
-					mapTypeId: MY_MAPTYPE_ID
+					mapTypeControl: false
 				};
 				
 				var map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
-				var styledMapOptions = {
-					name: 'Custom Style'
-				};
-				
-				var customMapType = new google.maps.StyledMapType(featureOpts, styledMapOptions);
-				map.mapTypes.set(MY_MAPTYPE_ID, customMapType);
-				map.setMapTypeId(MY_MAPTYPE_ID);
-				
-				var customMapType2 = new google.maps.StyledMapType(featureOpts2, styledMapOptions2);
-				map.mapTypes.set(MY_MAPTYPE_ID2, customMapType2);
+				map.setOptions({ styles: styles['default'] });
 				
 				// Create the search box and link it to the UI element.
 				var input = /** @type {HTMLInputElement} */ (document.getElementById('pac-input'));
@@ -197,17 +140,94 @@
 					searchBox.setBounds(bounds);
 				});
 				
-				// Create the DIV to hold the control and
-				// call the CenterControl() constructor passing
-				// in this DIV.
-				var centerControlDiv = document.createElement('div');
-				var centerControl = new ToggleLabelControl(centerControlDiv, map);
+				var floatPanel = document.getElementById('floating-panel');
 
-				centerControlDiv.index = 1;
-				map.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(centerControlDiv);
-            }
-			
-			google.maps.event.addDomListener(window, 'load', initialize);
+				map.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(floatPanel);
+
+				document.querySelector('#label-ctrl').addEventListener('click', function() {
+					if (this.checked) {
+						console.log('value: ', this.checked);
+						map.setOptions({ styles: styles['hide_all'] });
+					} else {
+						console.log('value: ', this.checked);
+						map.setOptions({ styles: styles['default'] });
+					}
+				});
+
+				document.querySelector('#poi-ctrl').addEventListener('click', function() {
+					if (this.checked) {
+						console.log('value: ', this.checked);
+						map.setOptions({ styles: styles['hide_poi'] });
+					} else {
+						console.log('value: ', this.checked);
+						map.setOptions({ styles: styles['default'] });
+					}
+				});
+			}
+
+			var styles = {
+				default: [
+				{
+					"featureType": "poi.business",
+					"elementType": "labels.icon",
+					"stylers": [
+						{ "visibility": "off" }
+					]
+				},{
+					"featureType": "transit.station.rail",
+					"elementType": "labels.text.fill",
+					"stylers": [
+						{ "color": "#b7343b" }
+					]
+				}, {
+					"featureType": "transit.station.rail",
+					"elementType": "labels.icon",
+					"stylers": [
+						{ "hue": "#b6343b" },
+						{ "gamma": 0.45 }
+					]
+				}],
+				hide_all: [
+					{
+						"elementType": "labels.text",
+						"stylers": [
+							{ "visibility": "off" }
+						]
+					}, {
+						"elementType": "labels.icon",
+						"stylers": [
+							{ "visibility": "off" }
+						]
+					}
+				],
+				hide_poi: [
+					{
+						featureType: 'poi',
+						elementType: 'labels.text',
+						stylers: [{ visibility: 'off' }]
+					},
+					{
+						featureType: 'transit.station.rail',
+						elementType: 'labels.text',
+						stylers: [{ visibility: 'off' }]
+					},
+					{
+						"featureType": "poi.business",
+						"elementType": "labels.icon",
+						"stylers": [{ "visibility": "off" }]
+					},
+					{
+						"featureType": "transit.station.rail",
+						"elementType": "labels.text.fill",
+						"stylers": [{ "color": "#b7343b" }]
+					},
+					{
+						"featureType": "transit.station.rail",
+						"elementType": "labels.icon",
+						"stylers": [{ "hue": "#b6343b" }, {"gamma": 0.45 }]
+					}
+				]
+			};
 		</script>
 	</head>
 	<body>
@@ -217,12 +237,7 @@
 			</div>
 		</div>
 		<div class="row">
-			<div class="large-4 small-6 columns">
-			    <input id="pac-input" class="controls" type="text" placeholder="Search Box">
-			    <span class="clearInput" onclick="clearInput()" style="visibility: hidden">+</span>
-			</div>
 			<div class="large-4 small-6 columns" id="map-canvas"></div>
-			<div class="large-4 small-6 columns"></div>
 		</div>
 		<div class="row">
 			<div class="large-12 columns">
@@ -244,6 +259,14 @@
 				</div>
 			</div>
 		</div>
+		<div class="large-4 small-6 columns">
+			<input id="pac-input" class="controls" type="text" placeholder="Search Box">
+			<span class="clearInput" onclick="clearInput()" style="visibility: hidden">+</span>
+		</div>
+		<div id="floating-panel">
+			<span><input type=checkbox id="label-ctrl"><label for="label-ctrl">Toggle Labels</label></span>
+			<span><input type=checkbox id="poi-ctrl"><label for="poi-ctrl">Toggle POI</label></span>
+		</div>
 		
 		<footer class="row">
 			<hr/>
@@ -258,7 +281,7 @@
                 document.getElementById("pac-input")
                         .addEventListener("input", function() {
                             var clearBtn = document.getElementsByClassName("clearInput")[0];
-                            
+
                             if(this.value != '') {
                                 clearBtn.style.visibility = 'visible';
                             } else {
@@ -271,6 +294,7 @@
 				document.getElementById("pac-input").value = "";
                 document.getElementsByClassName("clearInput")[0].style.visibility = 'hidden';
 			}
-        </script>
+		</script>
+		<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=places&callback=initMap" async defer></script>
 	</body>
 </html>
