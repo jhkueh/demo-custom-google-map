@@ -58,7 +58,7 @@
 			#pac-input { 
 				background-color: #fff; height: 30px; width: 400px; font-family: Roboto; font-size: 15px; font-weight: 300; text-overflow: ellipsis;
 			}
-			#pac-input:focus {border-color: #4d90fe; margin-left: -1px; padding-left: 14px;  /* Regular padding-left + 1. */ width: 401px;}
+			#pac-input:focus {border-color: #4d90fe}
 		</style>
 
 		<script type="text/javascript">
@@ -75,9 +75,9 @@
 				map.setOptions({ styles: styles['default'] });
 				
 				// Create the search box and link it to the UI element.
+				map.controls[google.maps.ControlPosition.TOP_LEFT].push((document.getElementById('searchBox')));
+
 				var input = /** @type {HTMLInputElement} */ (document.getElementById('pac-input'));
-				map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
-				
 				var searchBox = new google.maps.places.SearchBox((input)); /** @type {HTMLInputElement} */
 				
 				// [START region_getplaces]
@@ -257,8 +257,8 @@
 				</div>
 			</div>
 		</div>
-		<div id="pac-input">
-			<input class="controls" type="text" placeholder="Search Box">
+		<div id="searchBox">
+			<input class="controls" id="pac-input" type="text" placeholder="Search Box">
 			<span class="clearInput" onclick="clearInput()" style="visibility: hidden">+</span>
 		</div>
 		<div id="floating-panel">
@@ -289,7 +289,7 @@
             };
             
             function clearInput() {
-				document.querySelector("#pac-input input").value = "";
+				document.querySelector("#pac-input").value = "";
                 document.getElementsByClassName("clearInput")[0].style.visibility = 'hidden';
 			}
 		</script>
